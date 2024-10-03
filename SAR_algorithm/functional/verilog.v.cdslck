@@ -1,0 +1,16 @@
+#
+# Edit Lock-Stake file. CAUTION: Please do not change.
+#
+# Information about current Edit Lock Owner.
+#
+LockStakeVersion               1.1
+LoginName                      baileyg
+HostName                       micron3.eng.tau.ac.il
+ProcessIdentifier              94098
+ProcessCreationTime_UTC        1724933153
+ProcessCreationTime_Readable   Thu Aug 29 15:05:53 2024 IDT
+AppIdentifier                  /tools/cadence/IC/06.18.290/tools/dfII/bin/64bit/virtuoso
+OSType                         lnx86
+ReasonForPlacingEditLock       Text Edit
+FilePathUsedToEditLock         /project/ibm8hp/users/baileyg/ws/DLDO_final/SAR_algorithm/functional/verilog.v
+TimeEditLocked                 Thu Aug 29 15:15:05 2024 IDT

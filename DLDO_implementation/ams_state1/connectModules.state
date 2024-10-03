@@ -1,0 +1,6 @@
+disciplinesList nil
+connectRules nil
+userDefinedDVSConnrules nil
+amsIEsList ((t "global" "" "Value" "3" "connectLib.CR_full_fast" "" "logic" "discipline=logic;" "Built-in"))
+useIeSetup t
+connectRulesIrun nil
