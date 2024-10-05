@@ -1,0 +1,40 @@
+module SAR_algorithm ( 
+	input clk, //the clock input 
+	input hl, //an input which determines whether the input voltage is higher or lower than the reference voltage 
+    input [7:0] vref, //the reference voltage 
+    input [7:0] vin, //the input voltage 
+    output reg [7:0] digital_output = 8'b01111111 //the output voltage which is set to an initial state of the MSB being on while the rest of the bits are off (0 is on in PMOS)
+);
+	reg gtz = 1'b1; //a register which determines if the bit being worked on in the SAR algorithm is greater than zero
+	reg [2:0] current_bit = 7; //a register which determines which bit is being worked on 
+	wire [7:0] diff = vin - vref; //a wire which calculates the numerical difference between vin and vref 
+	wire [7:0] diffabs; //a wire which calculates the absolute value of diff
+	assign diffabs = (diff[7] == 1'b1) ? -diff : diff; //how to take the absolute value 
+	reg starthold = 1; //used to delay the 5th and 6th bits by one clock cycle so that the SAR works as intended 
+always @(posedge clk) begin //what happens when the clock edge rises 
+	if (gtz == 1) begin : SAR_algorithm //determines if we should be in the SAR algorithm
+		if (starthold == 0) starthold <= 1; //if the register of starthold is set to 0 set it to 1 for the next clock cycle 
+		if (diffabs <= 8'd1 && starthold == 1) begin //if the current difference between vin and the reference voltage is 1, we stop the SAR algorithm by setting gtz to 1 and going to the next CC
+			gtz <= 0;
+			@(posedge clk);
+		end
+		else if (vin > vref && gtz == 1 && starthold == 1) digital_output[current_bit] <= 1; //if vin is greater than vref and all the other conditions hold, we set the current bit to low 
+		if (current_bit > 0 && gtz == 1 && starthold == 1) begin 
+			current_bit <= current_bit - 1; //we reduce the current bit by 1 as we are going from the MSB to the LSB
+			digital_output[current_bit - 1] <= 0; //We set the vale of the current bit to 0 to later check if vin is greater than vref 
+			if (current_bit - 1 == 6 || current_bit - 1 == 5) starthold <= 0; //if the next bit is 6 or 5, we set the starthold register to 0 to signify that we need to wait an extra clock cycle
+		end if (current_bit == 0 && gtz == 1 && starthold == 1) gtz <= 0; //if the current bit is 0, we know that we have finished the algorithm so gtz is set to 0 
+	end
+	if (gtz == 0 && diffabs >= 8'd2) begin //this is the case where we are out of the SAR algorithm but diffabs is greater than 2 meaning we still need to make an adjustment to the regulation
+		if (diffabs >= 8'd7) begin //if the diffabs is very large, it would be more efficient to run the SAR algorithm again rather than use the counter which we do here by resetting the registers
+			gtz <= 1;
+			current_bit <= 7;
+			digital_output <= 8'b01111111;
+		end else if (diffabs >= 8'd2) begin //if diffabs is greater than 1 but not very large we can make adjustments using the counter 
+			if (hl == 1) digital_output <= digital_output + 1;	//if the hl signal is 1 we need to count up which we do here 
+			else digital_output <= digital_output - 1; //if the hl signal is 0 we need to count down which we do here 
+		end
+	end
+end
+endmodule
+
